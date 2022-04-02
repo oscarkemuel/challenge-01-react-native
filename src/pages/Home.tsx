@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { Header } from '../components/Header';
 import { Task, TasksList } from '../components/TasksList';
@@ -10,28 +10,32 @@ export function Home() {
 
   function handleAddTask(newTaskTitle: string) {
     //TODO - add new task
-    const data: Task = {
-      id: new Date().getTime(),
-      title: newTaskTitle,
-      done: false
-    }
+    const taskIndex = tasks.findIndex(task => task.title === newTaskTitle)
 
-    setTasks([...tasks, data])
+    if(taskIndex >= 0){
+      Alert.alert('Task já cadastrada', 'Você não pode cadastrar uma task com o mesmo nome')
+    } else {
+      const data: Task = {
+        id: new Date().getTime(),
+        title: newTaskTitle,
+        done: false
+      }
+  
+      setTasks([...tasks, data])
+    }
+    
   }
 
   function handleToggleTaskDone(id: number) {
     //TODO - toggle task done if exists
     const taskIndex = tasks.findIndex(task => task.id === id)
-    console.log(id, taskIndex)
 
-    if(typeof taskIndex === 'number'){
+    if(taskIndex >= 0){
       let taskChanged = [...tasks];
 
       if(!taskChanged[taskIndex].done){
-        console.log('false')
         taskChanged[taskIndex].done = true;
       } else {
-        console.log('true')
         taskChanged[taskIndex].done = false;
       }
 
@@ -41,7 +45,28 @@ export function Home() {
 
   function handleRemoveTask(id: number) {
     //TODO - remove task from state
-    setTasks([...tasks.filter(task => task.id !== id)])
+    Alert.alert('Remover item', 'Tem certeza que você deseja remover esse item?', [
+      {
+        text: 'NÃO',
+      },
+      {
+        text: 'SIM',
+        onPress: () => setTasks([...tasks.filter(task => task.id !== id)])
+      }
+    ] )
+    
+  }
+
+  function handleEditTask(taskId: number, taskNewTitle: string) {
+    const taskIndex = tasks.findIndex(task => task.id === taskId);
+
+    if(taskIndex >= 0){
+      let taskChanged = [...tasks];
+
+      taskChanged[taskIndex].title = taskNewTitle;
+
+      setTasks(taskChanged);
+    }
   }
 
   return (
@@ -53,7 +78,8 @@ export function Home() {
       <TasksList 
         tasks={tasks} 
         toggleTaskDone={handleToggleTaskDone}
-        removeTask={handleRemoveTask} 
+        removeTask={handleRemoveTask}
+        editTask={handleEditTask}
       />
     </View>
   )
